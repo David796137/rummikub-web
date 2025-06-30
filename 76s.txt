@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Rummikub Web</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Rummikub Web</h1>
+  <div id="mesa"></div>
+  <div id="jugadores"></div>
+  <div id="acciones"></div>
+  <script src="script.js"></script>
+</body>
+</html>

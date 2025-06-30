@@ -1,0 +1,119 @@
+// ... Código previo para crear y repartir fichas ...
+
+let turno = 0; // 0: Jugador 1, 1: Jugador 2
+let seleccionadas = [];
+let mesa = [];
+
+// Función para renderizar la mano y seleccionar fichas
+function renderMano(jugador) {
+  const contenedor = document.getElementById('game');
+  contenedor.innerHTML = `<h2>${jugador.nombre}: Selecciona fichas para la jugada inicial (mínimo 30 puntos, combinaciones válidas)</h2>`;
+  const div = document.createElement('div');
+  jugador.mano.forEach((ficha, idx) => {
+    let texto = ficha.color === 'comodin' ? '🃏 Comodín' : `${ficha.numero} (${ficha.color})`;
+    let span = document.createElement('span');
+    span.textContent = texto + ' ';
+    span.style.marginRight = '8px';
+    span.style.cursor = 'pointer';
+    span.style.background = seleccionadas.includes(idx) ? '#cde' : '';
+    span.onclick = () => {
+      if (seleccionadas.includes(idx)) {
+        seleccionadas = seleccionadas.filter(i => i !== idx);
+      } else {
+        seleccionadas.push(idx);
+      }
+      renderMano(jugador); // Volver a renderizar para mostrar selección
+    };
+    div.appendChild(span);
+  });
+  contenedor.appendChild(div);
+
+  // Mostrar fichas seleccionadas y suma
+  const seleccion = seleccionadas.map(i => jugador.mano[i]);
+  const suma = seleccion.reduce((acc, ficha) => ficha.color !== 'comodin' ? acc + ficha.numero : acc, 0);
+  contenedor.appendChild(document.createElement('br'));
+  contenedor.appendChild(document.createTextNode(`Suma (sin comodines): ${suma}`));
+
+  // Botón para validar jugada inicial
+  const btn = document.createElement('button');
+  btn.textContent = 'Jugar fichas seleccionadas';
+  btn.onclick = () => validarJugada(jugador);
+  contenedor.appendChild(document.createElement('br'));
+  contenedor.appendChild(btn);
+
+  // Mostrar mesa
+  mostrarMesa();
+}
+
+// Función para validar si las fichas seleccionadas son una combinación válida
+function esCombinacionValida(fichas) {
+  if (fichas.length < 3) return false;
+
+  // Filtrar si hay comodines
+  const noComodin = fichas.filter(f => f.color !== 'comodin');
+  const soloComodin = fichas.filter(f => f.color === 'comodin').length;
+
+  // Verificar grupo (mismo número, diferentes colores)
+  const numeros = noComodin.map(f => f.numero);
+  const colores = noComodin.map(f => f.color);
+  const unicoNumero = new Set(numeros).size === 1;
+  const coloresUnicos = new Set(colores).size === noComodin.length;
+  if (unicoNumero && coloresUnicos && fichas.length <= 4) return true;
+
+  // Verificar escalera (mismo color, números consecutivos)
+  if (new Set(noComodin.map(f => f.color)).size === 1) {
+    let nums = noComodin.map(f => f.numero).sort((a, b) => a - b);
+    // Insertar comodines como huecos
+    let gaps = 0;
+    for (let i = 1; i < nums.length; i++) {
+      gaps += nums[i] - nums[i - 1] - 1;
+    }
+    if (gaps <= soloComodin) return true;
+  }
+  return false;
+}
+
+// Función para validar la jugada (suma y combinación)
+function validarJugada(jugador) {
+  let seleccion = seleccionadas.map(idx => jugador.mano[idx]);
+  // Validar suma para jugada inicial
+  let suma = seleccion.reduce((acc, f) => f.color !== 'comodin' ? acc + f.numero : acc, 0);
+  if (suma < 30) {
+    alert('Jugada no válida: Debes alcanzar al menos 30 puntos (sin comodines).');
+    return;
+  }
+  if (!esCombinacionValida(seleccion)) {
+    alert('Las fichas seleccionadas no forman una combinación válida.');
+    return;
+  }
+  // Quitar fichas jugadas de la mano y pasarlas a la mesa
+  seleccionadas.sort((a, b) => b - a);
+  let jugada = [];
+  seleccionadas.forEach(idx => {
+    jugada.push(jugador.mano[idx]);
+    jugador.mano.splice(idx, 1);
+  });
+  mesa.push(jugada);
+  seleccionadas = [];
+  // Cambiar turno
+  turno = (turno + 1) % jugadores.length;
+  renderMano(jugadores[turno]);
+}
+
+// Mostrar jugadas en la mesa
+function mostrarMesa() {
+  let mesaDiv = document.getElementById('mesa');
+  if (!mesaDiv) {
+    mesaDiv = document.createElement('div');
+    mesaDiv.id = 'mesa';
+    document.getElementById('game').appendChild(mesaDiv);
+  }
+  mesaDiv.innerHTML = '<h3>Mesa:</h3>';
+  mesa.forEach((jugada, idx) => {
+    let grupo = jugada.map(f => f.color === 'comodin' ? '🃏' : `${f.numero} (${f.color})`).join(' - ');
+    mesaDiv.innerHTML += `<div>Combinación ${idx + 1}: ${grupo}</div>`;
+  });
+}
+
+// Inicializar juego mostrando la mano del primer jugador
+renderMano(jugadores[turno]);

@@ -1,0 +1,60 @@
+﻿// Definición de colores y fichas
+const colores = ['rojo', 'azul', 'amarillo', 'negro'];
+let fichas = [];
+
+// Generar las fichas (dos de cada una)
+colores.forEach(color => {
+  for (let n = 1; n <= 13; n++) {
+    fichas.push({ color, numero: n});
+    fichas.push({ color, numero: n});
+  }
+});
+
+// Agregar los comodines
+fichas.push({ color: 'comodin', numero: null });
+fichas.push({ color: 'comodin', numero: null });
+
+// Función para mezclar el array de fichas (algoritmo Fisher-Yates)
+function mezclar(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+// Mezclar las fichas
+mezclar(fichas);
+
+// Crear manos de jugadores (2 jugadores, 14 fichas cada uno)
+const jugadores = [
+  { nombre: "Jugador 1", mano: [] },
+  { nombre: "Jugador 2", mano: [] }
+];
+
+for (let i = 0; i < 14; i++) {
+  jugadores[0].mano.push(fichas.pop());
+  jugadores[1].mano.push(fichas.pop());
+}
+
+// Mostrar las manos en la página
+const contenedor = document.getElementById('game');
+contenedor.innerHTML = '';
+
+jugadores.forEach(jugador => {
+  const div = document.createElement('div');
+  div.innerHTML = `<h3>${jugador.nombre}</h3>`;
+  jugador.mano.forEach(ficha => {
+    let texto = ficha.color === 'comodin' ? '🃏 Comodín' : `${ficha.numero} (${ficha.color})`;
+    let span = document.createElement('span');
+    span.textContent = texto + ' ';
+    span.style.marginRight = '8px';
+    div.appendChild(span);
+  });
+  contenedor.appendChild(div);
+});
+
+// Mostrar cuántas fichas quedan en el "pozo"
+const restantes = document.createElement('p');
+restantes.textContent = `Fichas restantes en el pozo: ${fichas.length}`;
+contenedor.appendChild(restantes);
