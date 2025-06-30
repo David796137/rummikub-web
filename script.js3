@@ -40,6 +40,22 @@ function mostrarFichas(fichas, seleccionadas) {
         };
         fichasDiv.appendChild(el);
     });
+
+    // Mostrar puntaje actual de la mano
+    mostrarPuntos(fichas);
+}
+
+function mostrarPuntos(fichas) {
+    let total = fichas.reduce((sum, ficha) => sum + ficha.numero, 0);
+    let puntosDiv = document.getElementById('puntos');
+    if (!puntosDiv) {
+        puntosDiv = document.createElement('div');
+        puntosDiv.id = 'puntos';
+        puntosDiv.style.marginTop = "14px";
+        puntosDiv.style.fontWeight = "bold";
+        document.getElementById("juego").appendChild(puntosDiv);
+    }
+    puntosDiv.innerText = `Puntos restantes en tu mano: ${total}`;
 }
 
 window.onload = function() {
@@ -66,8 +82,25 @@ window.onload = function() {
     document.getElementById("jugarBtn").onclick = function() {
         const jugada = Array.from(seleccionadas).map(idx => fichasJugador[idx]);
         const valido = validarJugada(jugada);
-        document.getElementById("mensaje").innerText = valido ?
-            "¡Jugada válida!" : "Jugada inválida. Debe ser grupo o escalera.";
+        if (valido) {
+            // Quitar fichas jugadas de la mano
+            fichasJugador = fichasJugador.filter((f, idx) => !seleccionadas.has(idx));
+            seleccionadas = new Set();
+            mostrarFichas(fichasJugador, seleccionadas);
+
+            // Mostrar puntos de la jugada
+            let puntosJugada = jugada.reduce((sum, f) => sum + f.numero, 0);
+
+            // Mostrar mensaje y puntos restantes
+            document.getElementById("mensaje").innerText = `¡Jugada válida! Puntos de la jugada: ${puntosJugada}`;
+            
+            // Si ya no quedan fichas, fin del juego
+            if (fichasJugador.length === 0) {
+                document.getElementById("mensaje").innerText += "\n¡Felicidades, terminaste el juego!";
+            }
+        } else {
+            document.getElementById("mensaje").innerText = "Jugada inválida. Debe ser grupo o escalera.";
+        }
     };
 };
 
