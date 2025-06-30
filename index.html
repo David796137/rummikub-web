@@ -1,10 +1,16 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-    <title>Mi primera página</title>
+    <meta charset="UTF-8">
+    <title>Juego de Adivinanza</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>¡Hola, GitHub Pages!</h1>
-    <p>Esta es mi página publicada.</p>
+    <h1>¡Adivina el número!</h1>
+    <p>Estoy pensando en un número entre 1 y 10. ¿Puedes adivinar cuál es?</p>
+    <input type="number" id="guess" min="1" max="10" />
+    <button onclick="adivinar()">Adivinar</button>
+    <p id="resultado"></p>
+    <script src="script.js"></script>
 </body>
 </html>
