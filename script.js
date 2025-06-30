@@ -1,16 +1,27 @@
-// Prototipo de fichas de Rummikub
 const colores = ['azul', 'rojo', 'negro', 'naranja'];
 const mesa = document.getElementById('mesa');
+const repartirBtn = document.getElementById('repartirBtn');
 
-// Crear 12 fichas de ejemplo
 let fichas = [];
-for (let i = 0; i < 12; i++) {
-    const color = colores[i % colores.length];
-    const numero = (i % 13) + 1;
-    fichas.push({ numero, color, id: i });
+
+function obtenerFichasAleatorias(cantidad) {
+    let mazo = [];
+    let id = 0;
+    for (let rep = 0; rep < 2; rep++) {
+        for (let color of colores) {
+            for (let numero = 1; numero <= 13; numero++) {
+                mazo.push({ numero, color, id: id++ });
+            }
+        }
+    }
+    // Barajar
+    for (let i = mazo.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [mazo[i], mazo[j]] = [mazo[j], mazo[i]];
+    }
+    return mazo.slice(0, cantidad);
 }
 
-// Renderizar fichas en la mesa
 function renderFichas() {
     mesa.innerHTML = '';
     fichas.forEach(ficha => {
@@ -19,7 +30,6 @@ function renderFichas() {
         div.textContent = ficha.numero;
         div.draggable = true;
         div.dataset.id = ficha.id;
-        // Eventos drag and drop
         div.addEventListener('dragstart', dragStart);
         div.addEventListener('dragend', dragEnd);
         mesa.appendChild(div);
@@ -62,4 +72,10 @@ function getDragAfterElement(container, x) {
     }, { offset: -Infinity }).element;
 }
 
+repartirBtn.addEventListener('click', () => {
+    fichas = obtenerFichasAleatorias(14);
+    renderFichas();
+});
+
+fichas = obtenerFichasAleatorias(14);
 renderFichas();
